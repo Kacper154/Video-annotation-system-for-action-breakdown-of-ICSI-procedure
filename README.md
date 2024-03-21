@@ -8,6 +8,9 @@ Video annotation can help in identifying key moments of the procedure, which in 
 Challenges related to video annotation of the ICSI procedure may include the need for precise identification and classification of different stages of the procedure, as well as technical challenges related to processing and analyzing video images.
 
 
+
+
+
 Technologies:
 
 🅰️ Frontend
