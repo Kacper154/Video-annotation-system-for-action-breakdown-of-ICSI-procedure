@@ -13,9 +13,11 @@ Technologies:
 🅰️ Frontend
 
 -HTML
+
 -CSS
 
 🍃 Backend
 
 -Python(Librares: SQLAlchemy, OpnenCv, TensorFlow)
+
 -JavaScript
