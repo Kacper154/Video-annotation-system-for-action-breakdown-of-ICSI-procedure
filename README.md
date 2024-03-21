@@ -9,10 +9,13 @@ Challenges related to video annotation of the ICSI procedure may include the nee
 
 
 Technologies:
+
 🅰️ Frontend
+
 -HTML
 -CSS
 
 🍃 Backend
+
 -Python(Librares: SQLAlchemy, OpnenCv, TensorFlow)
 -JavaScript
