@@ -1,0 +1,97 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+	background-color: #F6F6DB;
+}
+
+#gora {
+    background-color: #C4DEA4;
+    width: 100%;
+    letter-spacing: 3px;
+    font-size: 20px;
+    overflow: hidden;
+    padding: 20px;
+    color: white;
+}
+
+#container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
+
+#video-section {
+    width: 45%;
+}
+
+#video-container {
+    margin-bottom: 20px;
+}
+
+#annotation-section {
+    width: 45%;
+}
+
+#annotation-form {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#annotation-form label,
+#annotation-form input[type="text"],
+#annotation-form textarea,
+#annotation-form button {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+#annotation-form input[type="text"],
+#annotation-form textarea {
+    flex: 1; /* Rozciągnij pola, aby zajmowały dostępne miejsce */
+}
+
+#annotation-form button {
+    flex-basis: 100%; /* Spraw, aby przycisk zajmował całą dostępną szerokość */
+}
+
+#annotation-list {
+    margin-top: 20px;
+}
+
+#annotations {
+    list-style-type: none;
+    padding: 0;
+}
+
+.annotation-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+#video-wrapper {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    padding-top: 56.25%; /* Proporcje 16:9 */
+}
+
+#video-wrapper::before {
+    content: '';
+    display: block;
+    padding-top: 0;
+}
+
+#video-wrapper video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+textarea {
+    width: 100%;
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Annotation System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header id="gora">
+        <h1>Video Annotation System</h1>
+    </header>
+    <div id="container">
+        <div id="video-section">
+            <div id="video-container">
+                <input type="file" id="video-input" accept="video/mp4">
+                <div id="video-wrapper"></div>
+            </div>
+        </div>
+        <div id="annotation-section">
+            <div id="annotation-form">
+                <label for="time">Time:</label>
+                <input type="text" id="time" name="time" readonly>
+                <label for="annotation">Annotation:</label>
+                <textarea id="annotation" name="annotation"></textarea>
+                <button id="add-annotation">Add</button>
+            </div>
+            <div id="annotation-list">
+                <h2>Annotations:</h2>
+                <ul id="annotations"></ul>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
