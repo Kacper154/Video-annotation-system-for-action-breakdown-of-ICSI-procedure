@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-	background-color: #F6F6DB;
+    background-color: #F6F6DB;
 }
 
 #gora {
@@ -41,19 +41,19 @@ body {
 
 #annotation-form label,
 #annotation-form input[type="text"],
-#annotation-form textarea,
+#annotation-form select,
 #annotation-form button {
     margin-right: 10px;
     margin-bottom: 10px;
 }
 
 #annotation-form input[type="text"],
-#annotation-form textarea {
-    flex: 1; 
+#annotation-form select {
+    flex: 1; /* Rozciągnij pola, aby zajmowały dostępne miejsce */
 }
 
 #annotation-form button {
-    flex-basis: 100%;
+    flex-basis: 100%; /* Spraw, aby przycisk zajmował całą dostępną szerokość */
 }
 
 #annotation-list {
@@ -69,13 +69,25 @@ body {
     margin-bottom: 10px;
     padding: 10px;
     border: 1px solid #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer; /* Dodano zmiana kursora */
+}
+
+.annotation-item button {
+    background: none;
+    border: none;
+    color: red;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 #video-wrapper {
     width: 100%;
     position: relative;
     overflow: hidden;
-    padding-top: 56.25%; 
+    padding-top: 56.25%; /* Proporcje 16:9 */
 }
 
 #video-wrapper::before {
@@ -92,6 +104,11 @@ body {
     height: 100%;
 }
 
-textarea {
+select, textarea {
     width: 100%;
+}
+
+#download-annotations, #load-annotations {
+    margin-top: 20px;
+    margin-right: 10px;
 }
