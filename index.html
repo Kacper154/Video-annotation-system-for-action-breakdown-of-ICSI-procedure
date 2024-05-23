@@ -15,20 +15,34 @@
             <div id="video-container">
                 <input type="file" id="video-input" accept="video/mp4">
                 <div id="video-wrapper"></div>
+                <button id="toggle-speed">Toggle Speed</button>
             </div>
         </div>
         <div id="annotation-section">
             <div id="annotation-form">
-                <label for="time">Time:</label>
-                <input type="text" id="time" name="time" readonly>
+                <label for="start-time">Start Time:</label>
+                <input type="text" id="start-time" name="start-time" readonly>
+                <button id="start-time-btn">Start</button>
+                <label for="end-time">End Time:</label>
+                <input type="text" id="end-time" name="end-time" readonly>
+                <button id="end-time-btn">End</button>
                 <label for="annotation">Annotation:</label>
-                <textarea id="annotation" name="annotation"></textarea>
-                <button id="add-annotation">Add</button>
+                <select id="annotation" name="annotation">
+                    <option value="Przygotowanie komórki jajowej">Przygotowanie komórki jajowej</option>
+                    <option value="Pobranie plemnika">Pobranie plemnika</option>
+                    <option value="Penetracja osłony przejrzystej i błony komórkowej">Penetracja osłony przejrzystej i błony komórkowej</option>
+                    <option value="Iniekcja plemnika">Iniekcja plemnika</option>
+                    <option value="Wycofanie mikropipety">Wycofanie mikropipety</option>
+                    <option value="Stabilizacja komórki jajowej po iniekcji">Stabilizacja komórki jajowej po iniekcji</option>
+                </select>
             </div>
             <div id="annotation-list">
                 <h2>Annotations:</h2>
                 <ul id="annotations"></ul>
             </div>
+            <button id="download-annotations">Download Annotations (TXT)</button>
+            <button id="download-annotations-json">Download Annotations (JSON)</button>
+            <input type="file" id="load-annotations" accept=".txt,.json">
         </div>
     </div>
     <script src="script.js"></script>
