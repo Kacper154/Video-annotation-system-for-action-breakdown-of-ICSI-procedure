@@ -1,6 +1,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     const videoInput = document.getElementById('video-input');
     const videoWrapper = document.getElementById('video-wrapper');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
     const startTimeInput = document.getElementById('start-time');
     const endTimeInput = document.getElementById('end-time');
     const annotationInput = document.getElementById('annotation');
@@ -22,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (file) {
             const fileType = file.type.split('/')[1];
             if (fileType !== 'mp4') {
-                alert('Please upload a video in MP4 format.');
+                alert('Please upload the video in MP4 format.');
                 return;
             }
 
@@ -35,13 +37,14 @@ document.addEventListener('DOMContentLoaded', function () {
             videoWrapper.innerHTML = '';
             videoWrapper.appendChild(videoElement);
 
-            // Clear time inputs
             startTimeInput.value = '';
             endTimeInput.value = '';
 
-            // Clear annotations
             annotations = [];
             annotationList.innerHTML = '';
+            updateProgressMarkers();
+
+            videoElement.addEventListener('timeupdate', updateProgressMarkers);
         }
     });
 
@@ -49,7 +52,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (videoElement) {
             startTimeInput.value = formatTime(videoElement.currentTime);
         } else {
-            alert('Please load a video first.');
+            alert('Load the video first.');
         }
     });
 
@@ -58,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
             endTimeInput.value = formatTime(videoElement.currentTime);
             addAnnotation();
         } else {
-            alert('Please load a video first.');
+            alert('Load the video first.');
         }
     });
 
@@ -69,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Add annotation to list
     function addAnnotation() {
         const startTime = parseTime(startTimeInput.value);
         const endTime = parseTime(endTimeInput.value);
@@ -104,54 +106,63 @@ document.addEventListener('DOMContentLoaded', function () {
 
             annotations.push({ startTime, endTime, annotationText });
 
-            // Clear inputs
             startTimeInput.value = '';
             endTimeInput.value = '';
+
+            updateProgressMarkers();
         } else {
-            alert('Invalid time range or overlapping annotation.');
+            alert('Incorrect time range or overlapping annotation.');
             startTimeInput.value = '';
             endTimeInput.value = '';
         }
     }
 
-    // Check if the time slot is available (no overlap with existing annotations)
     function isTimeSlotAvailable(startTime, endTime) {
         return !annotations.some(annotation => 
             (startTime < annotation.endTime && endTime > annotation.startTime)
         );
     }
 
-    // Remove annotation from the list and annotations array
     function removeAnnotation(annotationItem, startTime, endTime) {
         annotationList.removeChild(annotationItem);
         annotations = annotations.filter(annotation => annotation.startTime !== startTime || annotation.endTime !== endTime);
+        updateProgressMarkers();
     }
 
-    // Format time in MM:SS.SS format
     function formatTime(time) {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
         const centiseconds = Math.floor((time % 1) * 100);
-        return `${padZero(minutes)}:${padZero(seconds)}.${padZero(centiseconds, 2)}`;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
     }
 
-    // Parse time from MM:SS.SS format to seconds
     function parseTime(timeString) {
-        const [minutes, secondsWithCentiseconds] = timeString.split(':');
-        const [seconds, centiseconds] = secondsWithCentiseconds.split('.');
-        return parseInt(minutes, 10) * 60 + parseInt(seconds, 10) + (parseInt(centiseconds, 10) / 100);
+        const [minutes, rest] = timeString.split(':');
+        const [seconds, centiseconds] = rest.split('.');
+        return parseInt(minutes) * 60 + parseInt(seconds) + parseInt(centiseconds) / 100;
     }
 
-    // Add leading zero if needed
-    function padZero(num, length = 2) {
-        return num.toString().padStart(length, '0');
+    function updateProgressMarkers() {
+        if (!videoElement) return;
+
+        const duration = videoElement.duration;
+        progressBar.innerHTML = '';
+
+        annotations.forEach(annotation => {
+            const startRatio = annotation.startTime / duration;
+            const endRatio = annotation.endTime / duration;
+            const marker = document.createElement('div');
+            marker.classList.add('annotation-marker');
+            marker.style.left = `${startRatio * 100}%`;
+            marker.style.width = `${(endRatio - startRatio) * 100}%`;
+            progressBar.appendChild(marker);
+        });
     }
 
-    // Download annotations as .txt file
     downloadTxtBtn.addEventListener('click', function () {
         if (annotations.length > 0) {
             const fileName = `${currentVideoTitle} - ADNOTACJE.txt`;
-            let content = annotations.map(annotation => {
+            const content = annotations.map(annotation => {
                 const annotationText = annotationList.querySelector(`[data-start-time="${annotation.startTime}"] span`).innerText;
                 return `${annotationText}`;
             }).join('\n');
@@ -161,7 +172,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Download annotations as .json file
     downloadJsonBtn.addEventListener('click', function () {
         if (annotations.length > 0) {
             const fileName = `${currentVideoTitle} - ADNOTACJE.json`;
@@ -172,11 +182,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Load annotations from .txt or .json file
     loadInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (!videoElement) {
-            alert('Please load a video first.');
+            alert('Load the video first.');
             loadInput.value = '';
             return;
         }
@@ -197,8 +206,10 @@ document.addEventListener('DOMContentLoaded', function () {
         loadInput.value = '';
     });
 
-    // Load TXT annotations into the list
     function loadTxtAnnotations(content) {
+        annotations = [];
+        annotationList.innerHTML = '';
+
         const lines = content.split('\n');
         lines.forEach(line => {
             const match = line.match(/(\d+:\d+\.\d+)\s*-\s*(\d+:\d+\.\d+)\s*\(([^)]+)\):\s*(.*)/);
@@ -213,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         annotationItem.innerHTML = `<span><strong>${start} - ${end} (${title}):</strong> ${text}</span> <button class="remove-annotation">X</button>`;
                         annotationItem.dataset.startTime = startTime;
                         annotationItem.dataset.endTime = endTime;
-
+                        
                         const removeBtn = annotationItem.querySelector('.remove-annotation');
                         removeBtn.addEventListener('click', function (e) {
                             e.stopPropagation();
@@ -233,65 +244,70 @@ document.addEventListener('DOMContentLoaded', function () {
                         });
 
                         annotationList.appendChild(annotationItem);
+
                         annotations.push({ startTime, endTime, annotationText: text });
                     }
                 }
             }
         });
+
+        updateProgressMarkers();
     }
 
-    // Load JSON annotations into the list
     function loadJsonAnnotations(content) {
         try {
-            const jsonAnnotations = JSON.parse(content);
-            if (Array.isArray(jsonAnnotations)) {
-                jsonAnnotations.forEach(annotation => {
-                    const { startTime, endTime, annotationText } = annotation;
-                    if (startTime && endTime && annotationText && isTimeSlotAvailable(startTime, endTime)) {
-                        const annotationItem = document.createElement('li');
-                        annotationItem.classList.add('annotation-item');
-                        annotationItem.innerHTML = `<span><strong>${formatTime(startTime)} - ${formatTime(endTime)} (${currentVideoTitle}):</strong> ${annotationText}</span> <button class="remove-annotation">X</button>`;
-                        annotationItem.dataset.startTime = startTime;
-                        annotationItem.dataset.endTime = endTime;
+            annotations = [];
+            annotationList.innerHTML = '';
 
-                        const removeBtn = annotationItem.querySelector('.remove-annotation');
-                        removeBtn.addEventListener('click', function (e) {
-                            e.stopPropagation();
-                            removeAnnotation(annotationItem, startTime, endTime);
-                        });
+            const parsedAnnotations = JSON.parse(content);
+            parsedAnnotations.forEach(annotation => {
+                const { startTime, endTime, annotationText } = annotation;
+                if (isTimeSlotAvailable(startTime, endTime)) {
+                    const start = formatTime(startTime);
+                    const end = formatTime(endTime);
+                    const annotationItem = document.createElement('li');
+                    annotationItem.classList.add('annotation-item');
+                    annotationItem.innerHTML = `<span><strong>${start} - ${end} (${currentVideoTitle}):</strong> ${annotationText}</span> <button class="remove-annotation">X</button>`;
+                    annotationItem.dataset.startTime = startTime;
+                    annotationItem.dataset.endTime = endTime;
+                    
+                    const removeBtn = annotationItem.querySelector('.remove-annotation');
+                    removeBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        removeAnnotation(annotationItem, startTime, endTime);
+                    });
 
-                        annotationItem.addEventListener('click', function () {
-                            videoElement.currentTime = startTime;
-                            videoElement.play();
-                            const pauseVideo = () => {
-                                if (videoElement.currentTime >= endTime) {
-                                    videoElement.pause();
-                                    videoElement.removeEventListener('timeupdate', pauseVideo);
-                                }
-                            };
-                            videoElement.addEventListener('timeupdate', pauseVideo);
-                        });
+                    annotationItem.addEventListener('click', function () {
+                        videoElement.currentTime = startTime;
+                        videoElement.play();
+                        const pauseVideo = () => {
+                            if (videoElement.currentTime >= endTime) {
+                                videoElement.pause();
+                                videoElement.removeEventListener('timeupdate', pauseVideo);
+                            }
+                        };
+                        videoElement.addEventListener('timeupdate', pauseVideo);
+                    });
 
-                        annotationList.appendChild(annotationItem);
-                        annotations.push({ startTime, endTime, annotationText });
-                    }
-                });
-            } else {
-                throw new Error('Invalid JSON format.');
-            }
+                    annotationList.appendChild(annotationItem);
+
+                    annotations.push({ startTime, endTime, annotationText });
+                }
+            });
+
+            updateProgressMarkers();
         } catch (error) {
-            alert('Failed to load JSON annotations: ' + error.message);
+            alert('Error loading annotations from JSON file.');
         }
     }
 
-    // Download file utility function
     function downloadFile(fileName, content) {
-        const blob = new Blob([content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        a.click();
-        URL.revokeObjectURL(url);
+        const element = document.createElement('a');
+        const file = new Blob([content], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = fileName;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 });
