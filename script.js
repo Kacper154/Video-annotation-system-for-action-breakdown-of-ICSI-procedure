@@ -19,6 +19,15 @@ document.addEventListener('DOMContentLoaded', function () {
     let annotations = [];
     let isSpeedToggled = false;
 
+    const annotationColors = {
+        'Przygotowanie komórki jajowej': 'red',
+        'Pobranie plemnika': 'blue',
+        'Penetracja osłony przejrzystej i błony komórkowej': 'green',
+        'Iniekcja plemnika': 'yellow',
+        'Wycofanie mikropipety': 'purple',
+        'Stabilizacja komórki jajowej po iniekcji': 'orange'
+    };
+
     videoInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
@@ -155,6 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
             marker.classList.add('annotation-marker');
             marker.style.left = `${startRatio * 100}%`;
             marker.style.width = `${(endRatio - startRatio) * 100}%`;
+            marker.style.backgroundColor = annotationColors[annotation.annotationText];
             progressBar.appendChild(marker);
         });
     }
@@ -255,59 +265,51 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadJsonAnnotations(content) {
-        try {
-            annotations = [];
-            annotationList.innerHTML = '';
+        const jsonAnnotations = JSON.parse(content);
+        annotations = [];
+        annotationList.innerHTML = '';
 
-            const parsedAnnotations = JSON.parse(content);
-            parsedAnnotations.forEach(annotation => {
-                const { startTime, endTime, annotationText } = annotation;
-                if (isTimeSlotAvailable(startTime, endTime)) {
-                    const start = formatTime(startTime);
-                    const end = formatTime(endTime);
-                    const annotationItem = document.createElement('li');
-                    annotationItem.classList.add('annotation-item');
-                    annotationItem.innerHTML = `<span><strong>${start} - ${end} (${currentVideoTitle}):</strong> ${annotationText}</span> <button class="remove-annotation">X</button>`;
-                    annotationItem.dataset.startTime = startTime;
-                    annotationItem.dataset.endTime = endTime;
-                    
-                    const removeBtn = annotationItem.querySelector('.remove-annotation');
-                    removeBtn.addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        removeAnnotation(annotationItem, startTime, endTime);
-                    });
+        jsonAnnotations.forEach(annotation => {
+            if (isTimeSlotAvailable(annotation.startTime, annotation.endTime)) {
+                const annotationItem = document.createElement('li');
+                annotationItem.classList.add('annotation-item');
+                annotationItem.innerHTML = `<span><strong>${formatTime(annotation.startTime)} - ${formatTime(annotation.endTime)} (${currentVideoTitle}):</strong> ${annotation.annotationText}</span> <button class="remove-annotation">X</button>`;
+                annotationItem.dataset.startTime = annotation.startTime;
+                annotationItem.dataset.endTime = annotation.endTime;
+                
+                const removeBtn = annotationItem.querySelector('.remove-annotation');
+                removeBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    removeAnnotation(annotationItem, annotation.startTime, annotation.endTime);
+                });
 
-                    annotationItem.addEventListener('click', function () {
-                        videoElement.currentTime = startTime;
-                        videoElement.play();
-                        const pauseVideo = () => {
-                            if (videoElement.currentTime >= endTime) {
-                                videoElement.pause();
-                                videoElement.removeEventListener('timeupdate', pauseVideo);
-                            }
-                        };
-                        videoElement.addEventListener('timeupdate', pauseVideo);
-                    });
+                annotationItem.addEventListener('click', function () {
+                    videoElement.currentTime = annotation.startTime;
+                    videoElement.play();
+                    const pauseVideo = () => {
+                        if (videoElement.currentTime >= annotation.endTime) {
+                            videoElement.pause();
+                            videoElement.removeEventListener('timeupdate', pauseVideo);
+                        }
+                    };
+                    videoElement.addEventListener('timeupdate', pauseVideo);
+                });
 
-                    annotationList.appendChild(annotationItem);
+                annotationList.appendChild(annotationItem);
 
-                    annotations.push({ startTime, endTime, annotationText });
-                }
-            });
+                annotations.push({ startTime: annotation.startTime, endTime: annotation.endTime, annotationText: annotation.annotationText });
+            }
+        });
 
-            updateProgressMarkers();
-        } catch (error) {
-            alert('Error loading annotations from JSON file.');
-        }
+        updateProgressMarkers();
     }
 
     function downloadFile(fileName, content) {
-        const element = document.createElement('a');
-        const file = new Blob([content], { type: 'text/plain' });
-        element.href = URL.createObjectURL(file);
-        element.download = fileName;
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
+        const a = document.createElement('a');
+        const blob = new Blob([content], { type: 'text/plain' });
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(a.href);
     }
 });
