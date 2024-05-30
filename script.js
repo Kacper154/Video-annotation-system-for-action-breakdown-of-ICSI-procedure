@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Getting HTML elements by their ID
     const videoInput = document.getElementById('video-input');
     const videoWrapper = document.getElementById('video-wrapper');
     const progressContainer = document.getElementById('progress-container');
@@ -14,11 +15,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadInput = document.getElementById('load-annotations');
     const toggleSpeedBtn = document.getElementById('toggle-speed');
 
+    // Declaring variables
     let videoElement;
     let currentVideoTitle = '';
     let annotations = [];
     let isSpeedToggled = false;
 
+    // Defining colors for different types of annotations
     const annotationColors = {
         'Przygotowanie komórki jajowej': 'red',
         'Pobranie plemnika': 'blue',
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'Stabilizacja komórki jajowej po iniekcji': 'orange'
     };
 
+    // Handling video file change event
     videoInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
@@ -39,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             currentVideoTitle = file.name;
 
+            // Creating a URL for the selected video file
             const videoURL = URL.createObjectURL(file);
             videoElement = document.createElement('video');
             videoElement.src = videoURL;
@@ -46,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
             videoWrapper.innerHTML = '';
             videoWrapper.appendChild(videoElement);
 
+            // Clearing time fields and annotations
             startTimeInput.value = '';
             endTimeInput.value = '';
 
@@ -53,10 +59,12 @@ document.addEventListener('DOMContentLoaded', function () {
             annotationList.innerHTML = '';
             updateProgressMarkers();
 
+            // Updating video progress markers
             videoElement.addEventListener('timeupdate', updateProgressMarkers);
         }
     });
 
+    // Handling start time button click
     startTimeBtn.addEventListener('click', function () {
         if (videoElement) {
             startTimeInput.value = formatTime(videoElement.currentTime);
@@ -65,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Handling end time button click
     endTimeBtn.addEventListener('click', function () {
         if (videoElement) {
             endTimeInput.value = formatTime(videoElement.currentTime);
@@ -74,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Handling speed toggle button click
     toggleSpeedBtn.addEventListener('click', function () {
         if (videoElement) {
             isSpeedToggled = !isSpeedToggled;
@@ -81,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Function to add annotation to the list
     function addAnnotation() {
         const startTime = parseTime(startTimeInput.value);
         const endTime = parseTime(endTimeInput.value);
@@ -93,12 +104,14 @@ document.addEventListener('DOMContentLoaded', function () {
             annotationItem.dataset.startTime = startTime;
             annotationItem.dataset.endTime = endTime;
 
+            // Adding annotation removal handling
             const removeBtn = annotationItem.querySelector('.remove-annotation');
             removeBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 removeAnnotation(annotationItem, startTime, endTime);
             });
 
+            // Adding video playback handling from the start time of the annotation
             annotationItem.addEventListener('click', function () {
                 videoElement.currentTime = startTime;
                 videoElement.play();
@@ -126,18 +139,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Function to check the availability of the time slot for a new annotation
     function isTimeSlotAvailable(startTime, endTime) {
         return !annotations.some(annotation => 
             (startTime < annotation.endTime && endTime > annotation.startTime)
         );
     }
 
+    // Function to remove an annotation
     function removeAnnotation(annotationItem, startTime, endTime) {
         annotationList.removeChild(annotationItem);
         annotations = annotations.filter(annotation => annotation.startTime !== startTime || annotation.endTime !== endTime);
         updateProgressMarkers();
     }
 
+    // Function to format time into minutes, seconds, and centiseconds
     function formatTime(time) {
         const minutes = Math.floor(time / 60);
         const seconds = Math.floor(time % 60);
@@ -145,12 +161,14 @@ document.addEventListener('DOMContentLoaded', function () {
         return `${minutes}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
     }
 
+    // Function to parse time in the format "mm:ss.ss" into seconds
     function parseTime(timeString) {
         const [minutes, rest] = timeString.split(':');
         const [seconds, centiseconds] = rest.split('.');
         return parseInt(minutes) * 60 + parseInt(seconds) + parseInt(centiseconds) / 100;
     }
 
+    // Function to update video progress markers
     function updateProgressMarkers() {
         if (!videoElement) return;
 
@@ -169,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Handling TXT annotations download button click
     downloadTxtBtn.addEventListener('click', function () {
         if (annotations.length > 0) {
             const fileName = `${currentVideoTitle} - ADNOTACJE.txt`;
@@ -182,6 +201,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Handling JSON annotations download button click
     downloadJsonBtn.addEventListener('click', function () {
         if (annotations.length > 0) {
             const fileName = `${currentVideoTitle} - ADNOTACJE.json`;
@@ -192,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Handling annotations file change event
     loadInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (!videoElement) {
@@ -276,13 +297,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 annotationItem.innerHTML = `<span><strong>${formatTime(annotation.startTime)} - ${formatTime(annotation.endTime)} (${currentVideoTitle}):</strong> ${annotation.annotationText}</span> <button class="remove-annotation">X</button>`;
                 annotationItem.dataset.startTime = annotation.startTime;
                 annotationItem.dataset.endTime = annotation.endTime;
-                
+
+                // Adding annotation removal handling
                 const removeBtn = annotationItem.querySelector('.remove-annotation');
                 removeBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     removeAnnotation(annotationItem, annotation.startTime, annotation.endTime);
                 });
 
+                // Adding video playback handling from the start time of the annotation
                 annotationItem.addEventListener('click', function () {
                     videoElement.currentTime = annotation.startTime;
                     videoElement.play();
@@ -304,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateProgressMarkers();
     }
 
+    // Function to download file
     function downloadFile(fileName, content) {
         const a = document.createElement('a');
         const blob = new Blob([content], { type: 'text/plain' });
