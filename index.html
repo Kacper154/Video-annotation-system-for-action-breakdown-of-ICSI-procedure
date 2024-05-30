@@ -4,31 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Annotation System</title>
+    <!-- Linking the CSS stylesheet for styling -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Header section -->
     <header id="gora">
         <h1>Video Annotation System</h1>
     </header>
+    <!-- Main container for the video and annotation sections -->
     <div id="container">
+        <!-- Video section -->
         <div id="video-section">
             <div id="video-container">
+                <!-- Input for uploading the video file -->
                 <input type="file" id="video-input" accept="video/mp4">
+                <!-- Wrapper for the video element -->
                 <div id="video-wrapper"></div>
+                <!-- Progress bar container -->
                 <div id="progress-container">
                     <div id="progress-bar"></div>
                 </div>
+                <!-- Button to toggle video playback speed -->
                 <button id="toggle-speed">Toggle Speed</button>
             </div>
         </div>
+        <!-- Annotation section -->
         <div id="annotation-section">
             <div id="annotation-form">
+                <!-- Input and button for setting the start time of the annotation -->
                 <label for="start-time">Start Time:</label>
                 <input type="text" id="start-time" name="start-time" readonly>
                 <button id="start-time-btn">Start</button>
+                <!-- Input and button for setting the end time of the annotation -->
                 <label for="end-time">End Time:</label>
                 <input type="text" id="end-time" name="end-time" readonly>
                 <button id="end-time-btn">End</button>
+                <!-- Dropdown for selecting the annotation type -->
                 <label for="annotation">Annotation:</label>
                 <select id="annotation" name="annotation">
                     <option value="Przygotowanie komórki jajowej">Przygotowanie komórki jajowej</option>
@@ -39,15 +51,19 @@
                     <option value="Stabilizacja komórki jajowej po iniekcji">Stabilizacja komórki jajowej po iniekcji</option>
                 </select>
             </div>
+            <!-- Section to display the list of annotations -->
             <div id="annotation-list">
                 <h2>Annotations:</h2>
                 <ul id="annotations"></ul>
             </div>
+            <!-- Buttons to download annotations in TXT and JSON formats -->
             <button id="download-annotations">Download Annotations (TXT)</button>
             <button id="download-annotations-json">Download Annotations (JSON)</button>
+            <!-- Input for loading annotations from a file -->
             <input type="file" id="load-annotations" accept=".txt,.json">
         </div>
     </div>
+    <!-- Linking the JavaScript file for functionality -->
     <script src="script.js"></script>
 </body>
 </html>
